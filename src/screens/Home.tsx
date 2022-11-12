@@ -33,14 +33,14 @@ class Home extends React.Component<HomePropsTypes, HomeStateTypes> {
     this.refresh()
   }
 
-  refresh = async () => {
+  refresh = () => {
     const { dispatch } = this.props
 
     this.setState({
       refresh: true
     })
 
-    await dispatch({ type: GET_TODOS_REQUEST })
+    dispatch({ type: GET_TODOS_REQUEST })
     
     this.setState({
       refresh: false
@@ -68,12 +68,23 @@ class Home extends React.Component<HomePropsTypes, HomeStateTypes> {
     )
   }
 
+  renderEmpty = () => {
+    return (
+      <View style={tw`flex-col items-center justify-center w-full`}>
+        <Text style={[tw`text-3xl text-orange-400`, fonts.fontRalewayBold]}>Todo list is empty.</Text>
+        <Text style={[tw`my-1 text-lg text-neutral-500`, fonts.fontRaleway]}>Create your first todo.</Text>
+      </View>
+    )
+  }
+
   renderItem = (items: any) => {
     return (
       <TodoCard
+        id={items.item.id}
         title={items.item.title}
         content={items.item.content}
         created={items.item.created}
+        refresh={this.refresh}
       />
     )
   }
@@ -95,9 +106,10 @@ class Home extends React.Component<HomePropsTypes, HomeStateTypes> {
               data={todos}
               renderItem={this.renderItem}
               ListHeaderComponent={this.renderHeader}
+              ListEmptyComponent={this.renderEmpty}
               refreshControl={
                 <RefreshControl
-                  colors={["#F07713", "#F7FFaF"]}
+                  colors={["#F07713", "#F07713"]}
                   refreshing={this.state.refresh}
                   onRefresh={this.refresh}
                 />
@@ -105,7 +117,7 @@ class Home extends React.Component<HomePropsTypes, HomeStateTypes> {
             />
           </View>
         )}
-        <View style={tw`absolute bottom-15 right-5 z-20`}>
+        <View style={tw`absolute bottom-15 right-7 z-20`}>
           <TouchableOpacity
             activeOpacity={0.7}
             style={tw`p-3 rounded-full shadow-lg bg-orange-400`}

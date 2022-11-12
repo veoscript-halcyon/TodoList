@@ -11,6 +11,7 @@ interface InitialState {
   error: string
 	
 	todos: any
+	id: string
 	title: string
 	content: string
 }
@@ -21,6 +22,7 @@ const initialState: InitialState = {
   error: '',
 	
 	todos: [],
+	id: '',
 	title: '',
 	content: ''
 }
@@ -40,6 +42,7 @@ export default function (state = initialState, action: Action) {
 		case types.RESET_TODO_FORM_STATE:
 			return {
 				...state,
+				id: '',
 				title: '',
 				content: '',
 			}
@@ -71,12 +74,31 @@ export default function (state = initialState, action: Action) {
 		case types.CREATE_TODOS_SUCCESS:
 			return {
 				...state,
-				isLoading: false,
-				isError: false,
 				title: action.payload.title,
-				content: action.payload.content
+				content: action.payload.content,
+				isLoading: false,
+				isError: false
 			}
 		case types.CREATE_TODOS_ERROR:
+			return {
+				...state,
+				isLoading: false,
+				isError: true,
+			}
+			case types.DELETE_TODOS_REQUEST:
+			return {
+				...state,
+				isLoading: true,
+				isError: false,
+			}
+		case types.DELETE_TODOS_SUCCESS:
+			return {
+				...state,
+				id: action.payload.id,
+				isLoading: false,
+				isError: false
+			}
+		case types.DELETE_TODOS_ERROR:
 			return {
 				...state,
 				isLoading: false,

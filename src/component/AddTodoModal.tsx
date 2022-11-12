@@ -21,11 +21,11 @@ class AddTodoModal extends React.PureComponent<AddTodoModalPropsTypes> {
     this.state = {}
   }
 
-  handleCreateTodo = () => {
+  handleCreateTodo = async () => {
     const { todos, dispatch, refresh, handleCloseAddTodoModal } = this.props
     const { title, content } = todos
 
-    dispatch({
+    await dispatch({
       type: CREATE_TODOS_REQUEST,
       payload: {
         title,
