@@ -1,22 +1,50 @@
 import React from 'react'
 import AddTodoModal from '../component/AddTodoModal'
+import TodoCard from '../component/TodoCard'
 import tw from 'twrnc'
 import { fonts } from '../styles/global'
 import { FeatherIcon } from '../config/Icons'
+import { SafeAreaView, View, Text, TouchableOpacity, FlatList, RefreshControl } from 'react-native'
 import { connect } from 'react-redux'
-import { SafeAreaView, View, Text, TouchableOpacity } from 'react-native'
+import { GET_TODOS_REQUEST } from '../redux/todos/action-types'
+
+interface HomePropsTypes {
+  todos: any
+  isLoading: boolean
+  dispatch: any
+}
 
 interface HomeStateTypes {
+  refresh: boolean
   modalVisible: boolean
 }
 
-export class Home extends React.PureComponent<any, HomeStateTypes> {
+class Home extends React.Component<HomePropsTypes, HomeStateTypes> {
 
-  constructor(props: any) {
+  constructor(props: HomePropsTypes) {
     super(props)
     this.state = {
+      refresh: false,
       modalVisible: false
     }
+  }
+
+  componentDidMount(): void {
+    this.refresh()
+  }
+
+  refresh = async () => {
+    const { dispatch } = this.props
+
+    this.setState({
+      refresh: true
+    })
+
+    await dispatch({ type: GET_TODOS_REQUEST })
+    
+    this.setState({
+      refresh: false
+    })
   }
 
   handleOpenAddTodoModal = () => {
@@ -31,28 +59,52 @@ export class Home extends React.PureComponent<any, HomeStateTypes> {
     })
   }
 
+  renderHeader = () => {
+    return (
+      <View style={tw`flex-col items-center w-full mb-5`}>
+        <Text style={[tw`text-2xl text-neutral-500`, fonts.fontRalewayBold]}>Todo App</Text>
+        <Text style={[tw`text-lg text-neutral-500`, fonts.fontRalewayLight]}>React Native + Redux Saga</Text>
+      </View>
+    )
+  }
+
+  renderItem = (items: any) => {
+    return (
+      <TodoCard
+        title={items.item.title}
+        content={items.item.content}
+        created={items.item.created}
+      />
+    )
+  }
+
   render() {
+
+    const { todos, isLoading } = this.props
+
     return (
       <SafeAreaView style={tw`relative flex-1 flex-col items-center justify-start w-full h-full px-3 py-5 bg-[#f1ffbc]`}>
-        <View style={tw`flex-col items-center w-full`}>
-          <Text style={[tw`text-2xl text-neutral-500`, fonts.fontRalewayBold]}>Todo App</Text>
-          <Text style={[tw`text-lg text-neutral-500`, fonts.fontRalewayLight]}>React Native + Redux</Text>
-        </View>
-        <View style={tw`flex-col items-center w-full my-10`}>
-          <View style={tw`flex-col items-start w-full p-3 border-2 border-orange-400 rounded-xl bg-[#f7ffaf]`}>
-            <View style={tw`flex-col w-full`}>
-              <Text style={[tw`text-xl text-neutral-600 uppercase`, fonts.fontRalewayBold]}>Title</Text>
-            </View>
-            <View style={tw`flex-col w-full my-5`}>
-              <Text style={[tw`text-base text-neutral-600 uppercase`, fonts.fontRaleway]}>
-                Lorem ipsum, dolor sit amet consectetur adipisicing elit. Suscipit quod odit iusto, eveniet ipsam, nisi soluta earum nam perspiciatis voluptas dicta quas veniam totam ipsa reiciendis, accusantium architecto molestiae. Facilis.
-              </Text>
-            </View>
-            <View style={tw`flex-col w-full`}>
-              <Text style={[tw`text-sm text-[#8a8b41] uppercase`, fonts.fontRaleway]}>January 10, 2022</Text>
-            </View>
+        {isLoading && (
+          <View style={tw`flex-1 flex-col items-center justify-center w-full`}>
+            <Text style={[tw`text-2xl text-orange-400`, fonts.fontRalewayBold]}>Loading...</Text>
           </View>
-        </View>
+        )}
+        {!isLoading && (
+          <View style={tw`flex-1 flex-col w-full`}>
+            <FlatList
+              data={todos}
+              renderItem={this.renderItem}
+              ListHeaderComponent={this.renderHeader}
+              refreshControl={
+                <RefreshControl
+                  colors={["#F07713", "#F7FFaF"]}
+                  refreshing={this.state.refresh}
+                  onRefresh={this.refresh}
+                />
+              }
+            />
+          </View>
+        )}
         <View style={tw`absolute bottom-15 right-5 z-20`}>
           <TouchableOpacity
             activeOpacity={0.7}
@@ -67,6 +119,7 @@ export class Home extends React.PureComponent<any, HomeStateTypes> {
           </TouchableOpacity>
         </View>
         <AddTodoModal
+          refresh={this.refresh}
           modalVisible={this.state.modalVisible}
           handleCloseAddTodoModal={this.handleCloseAddTodoModal}
         />
@@ -76,9 +129,8 @@ export class Home extends React.PureComponent<any, HomeStateTypes> {
 }
 
 const mapStateToProps = (state: any) => ({
-
+  todos: state.todosReducer.todos,
+  isLoading: state.todosReducer.isLoading
 })
 
-const mapDispatchToProps = {}
-
-export default connect(mapStateToProps, mapDispatchToProps)(Home)
+export default connect(mapStateToProps)(Home)
