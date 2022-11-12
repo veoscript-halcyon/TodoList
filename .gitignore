@@ -38,6 +38,14 @@ node_modules/
 npm-debug.log
 yarn-error.log
 
+# env
+.env
+.env.local
+
+# pocketbase
+/pb_data/
+pocketbase.exe
+
 # BUCK
 buck-out/
 \.buckd/
