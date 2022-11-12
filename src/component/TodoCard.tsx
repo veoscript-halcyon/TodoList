@@ -4,11 +4,16 @@ import tw from 'twrnc'
 import { fonts } from '../styles/global'
 import { FeatherIcon } from '../config/Icons'
 import { View, Text, TouchableOpacity } from 'react-native'
+import { DELETE_TODOS_REQUEST } from '../redux/todos/action-types'
+import { connect } from 'react-redux'
 
 interface TodoCardPropsTypes {
+  id: string
   title: string
   content: string
   created: string
+  refresh: any
+  dispatch: any
 }
 
 class TodoCard extends React.PureComponent<TodoCardPropsTypes> {
@@ -16,6 +21,19 @@ class TodoCard extends React.PureComponent<TodoCardPropsTypes> {
   constructor(props: TodoCardPropsTypes) {
     super(props)
     this.state = {}
+  }
+
+  handleDeleteTodo = async () => {
+    const { id, dispatch, refresh } = this.props
+
+    await dispatch({
+      type: DELETE_TODOS_REQUEST,
+      payload: {
+        id
+      }
+    })
+
+    refresh()
   }
 
   render() {
@@ -29,23 +47,21 @@ class TodoCard extends React.PureComponent<TodoCardPropsTypes> {
             <Text style={[tw`text-xl text-neutral-600 uppercase`, fonts.fontRalewayBold]}>{ title }</Text>
             <TouchableOpacity
               activeOpacity={0.7}
-              style={tw`p-1 rounded-full shadow-lg bg-orange-400`}
-              onPress={() => {
-                console.log('You Pressed Delete Task')
-              }}
+              style={tw`p-1 rounded-full shadow-lg bg-blue-500`}
+              onPress={this.handleDeleteTodo}
             >
               <FeatherIcon
-                name="x"
+                name="check"
                 size="small"
                 color="#FFFFFF"
               />
             </TouchableOpacity>
           </View>
           <View style={tw`flex-col w-full my-5`}>
-            <Text style={[tw`text-base text-neutral-600 uppercase`, fonts.fontRaleway]}>{ content }</Text>
+            <Text style={[tw`text-base text-neutral-600`, fonts.fontRaleway]}>{ content }</Text>
           </View>
           <View style={tw`flex-col w-full`}>
-            <Text style={[tw`text-xs text-[#8a8b41] uppercase`, fonts.fontRaleway]}>{ moment(created).fromNow() }</Text>
+            <Text style={[tw`text-xs text-[#8a8b41]`, fonts.fontRaleway]}>{ moment(created).fromNow() }</Text>
           </View>
         </View>
       </View>
@@ -53,4 +69,6 @@ class TodoCard extends React.PureComponent<TodoCardPropsTypes> {
   }
 }
 
-export default TodoCard
+const mapStateToProps = (state: any) => ({})
+
+export default connect(mapStateToProps)(TodoCard)
